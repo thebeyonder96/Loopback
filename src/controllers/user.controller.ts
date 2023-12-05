@@ -1,10 +1,10 @@
-import {TokenService} from '@loopback/authentication';
+import {TokenService, authenticate} from '@loopback/authentication';
 import {MyUserService, TokenServiceBindings, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {post, requestBody, response} from '@loopback/rest';
 import bcrypt from 'bcryptjs';
-import {User} from '../models';
+import {User, UserRole} from '../models';
 import {Meta} from '../models/meta.model';
 import {LOGIN_SUCCESS, REGISTER_SUCCESS} from '../models/success-message';
 
@@ -20,19 +20,25 @@ export class UserController {
   @post('/user/register')
   @response(200)
   async register(
-    @requestBody() user: User
+    @requestBody() user: Omit<User, 'id'>
   ) {
     try {
       const salt = await bcrypt.genSalt(10)
       user.password = await bcrypt.hash(user.password, salt)
       const USER = await this.userRepository.create(user)
       if (!USER) return new Error('Unable to register')
-      return new Meta(REGISTER_SUCCESS)
+      const userProfile = this.userService.convertToUserProfile(USER)
+      const TOKEN = await this.jwtService.generateToken(userProfile)
+      return new Meta(REGISTER_SUCCESS, TOKEN)
     } catch (error) {
       throw error
     }
   }
 
+  @authenticate({
+    strategy: "jwt",
+    options: {required: Object.values(UserRole)}
+  })
   @post('/user/login')
   @response(200)
   async login(

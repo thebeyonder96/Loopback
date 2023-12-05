@@ -1,4 +1,4 @@
-import {AuthenticationComponent} from '@loopback/authentication';
+import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
 import {JWTAuthenticationComponent, MyUserService, TokenServiceBindings, UserServiceBindings} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
@@ -13,6 +13,7 @@ import path from 'path';
 import {TokenServiceConstants} from './configs/key';
 import {MySequence} from './sequence';
 import {JwtService} from './services';
+import {JwtStrategy} from './strategies/jwt-strategy';
 
 export {ApplicationConfig};
 
@@ -23,6 +24,7 @@ export class CryptopassApplication extends BootMixin(
     super(options);
 
     this.component(AuthenticationComponent)
+    registerAuthenticationStrategy(this, JwtStrategy)
     this.component(JWTAuthenticationComponent)
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService)
     this.bind(TokenServiceBindings.TOKEN_SECRET).to(TokenServiceConstants.TOKEN_SECRET_KEY as string)
