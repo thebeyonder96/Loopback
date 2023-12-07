@@ -2,7 +2,7 @@ import {TokenService} from '@loopback/authentication';
 import {MyUserService, TokenServiceBindings, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {post, requestBody, response} from '@loopback/rest';
+import {getModelSchemaRef, post, requestBody, response} from '@loopback/rest';
 import bcrypt from 'bcryptjs';
 import {User} from '../models';
 import {Meta} from '../models/meta.model';
@@ -20,7 +20,13 @@ export class UserController {
   @post('/user/register')
   @response(200)
   async register(
-    @requestBody() user: Omit<User, 'id'>
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {exclude: ['id', 'status', 'userRole']})
+        }
+      }
+    }) user: Omit<User, 'id'>
   ) {
     try {
       const salt = await bcrypt.genSalt(10)
@@ -37,8 +43,16 @@ export class UserController {
   @post('/user/login')
   @response(200)
   async login(
-    @requestBody() user: loginUser
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {exclude: ['firstName', 'id', 'lastName', 'status', 'userRole']})
+        }
+      }
+    }) user: loginUser
   ) {
+    console.log(user);
+
     const EXISTING_USER = await this.userRepository.findOne({where: {email: user?.email}})
     if (EXISTING_USER) {
       const CHECK_PASSWORD = await bcrypt.compare(user.password, EXISTING_USER.password)

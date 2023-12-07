@@ -63,6 +63,7 @@
     "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.2",
     "loopback-connector-mongodb": "^7.0.0-alpha.1",
+    "loopback4-soft-delete": "^9.0.0",
     "tslib": "^2.0.0"
   },
   "devDependencies": {

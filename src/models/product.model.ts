@@ -1,7 +1,8 @@
-import {Entity, model, property} from '@loopback/repository';
+import {model, property} from '@loopback/repository';
+import {SoftDeleteEntity} from 'loopback4-soft-delete';
 
 @model({settings: {strict: true}})
-export class Product extends Entity {
+export class Product extends SoftDeleteEntity {
   @property({
     type: 'string',
     id: true,
